@@ -66,6 +66,14 @@ sealed interface RoboComponent {
 
     val id: Int = view.id
 
+    val systemBarGeometry: SystemBarGeometry? = roborazziOptions.systemBarsOptions?.let {
+      val location = IntArray(2).also(view::getLocationInWindow)
+      SystemBarGeometry.of(
+        view,
+        Rect(location[0], location[1], location[0] + view.width, location[1] + view.height)
+      )
+    }
+
     val idResourceName: String? = if (0xFFFFFFFF.toInt() == view.id) {
       null
     } else {
@@ -100,6 +108,13 @@ sealed interface RoboComponent {
     override val text: String = node.printToString()
     override val visibility: Visibility = Visibility.Visible
     val testTag: String? = node.config.getOrNull(SemanticsProperties.TestTag)
+
+    val systemBarGeometry: SystemBarGeometry? = roborazziOptions.systemBarsOptions?.let {
+      SystemBarGeometry.of(
+        (node.root as ViewRootForTest).view,
+        node.boundsInWindow.toAndroidRect()
+      )
+    }
 
     override val rect: Rect = run {
       val rect = Rect()
@@ -198,6 +213,8 @@ data class RoborazziOptions(
   val captureType: CaptureType = if (isNativeGraphicsEnabled()) CaptureType.Screenshot() else CaptureType.Dump(),
   val compareOptions: CompareOptions = CompareOptions(),
   val recordOptions: RecordOptions = RecordOptions(),
+  /** When set, placeholder system bars are painted onto the captured image. See [SystemBarsOptions]. */
+  val systemBarsOptions: SystemBarsOptions? = null,
 ) {
   sealed interface CaptureType {
     class Screenshot : CaptureType

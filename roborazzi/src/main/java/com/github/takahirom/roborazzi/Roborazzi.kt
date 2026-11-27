@@ -658,8 +658,21 @@ internal fun capture(
       onCanvas(
         RoboCanvas(width = image.width, height = image.height, true).apply {
           drawImage(Rect(0, 0, image.width, image.height), image)
+          drawSystemBarsIfRequested(rootComponent, roborazziOptions)
         }
       )
     }
   }
+}
+
+private fun RoboCanvas.drawSystemBarsIfRequested(
+  component: RoboComponent,
+  roborazziOptions: RoborazziOptions,
+) {
+  val options = roborazziOptions.systemBarsOptions ?: return
+  val geometry = when (component) {
+    is RoboComponent.View -> component.systemBarGeometry
+    is RoboComponent.Compose -> component.systemBarGeometry
+  } ?: return
+  drawSystemBars(geometry, options)
 }
