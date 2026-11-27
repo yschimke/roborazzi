@@ -90,6 +90,51 @@ class RoboCanvas(width: Int, height: Int, filled: Boolean) {
     }
   }
 
+  /** Fills a rounded rectangle with an ARGB colour, alpha-blended over the existing pixels. */
+  fun fillRoundRect(r: Rect, cornerRadius: Int, argb: Int) {
+    bufferedImage.graphics { graphics2D ->
+      graphics2D.antialiased()
+      graphics2D.color = Color(argb, true)
+      graphics2D.fillRoundRect(
+        r.left, r.top, r.width(), r.height(), cornerRadius * 2, cornerRadius * 2
+      )
+    }
+  }
+
+  /** Fills a closed polygon with an ARGB colour. */
+  fun fillPolygon(xPoints: IntArray, yPoints: IntArray, argb: Int) {
+    bufferedImage.graphics { graphics2D ->
+      graphics2D.antialiased()
+      graphics2D.color = Color(argb, true)
+      graphics2D.fillPolygon(xPoints, yPoints, xPoints.size)
+    }
+  }
+
+  /** Strokes a rounded rectangle inside [r]; a [cornerRadius] of half the size draws a circle. */
+  fun strokeRoundRect(r: Rect, cornerRadius: Int, strokeWidth: Float, argb: Int) {
+    bufferedImage.graphics { graphics2D ->
+      graphics2D.antialiased()
+      graphics2D.stroke = BasicStroke(strokeWidth)
+      graphics2D.color = Color(argb, true)
+      graphics2D.drawRoundRect(
+        r.left, r.top, r.width(), r.height(), cornerRadius * 2, cornerRadius * 2
+      )
+    }
+  }
+
+  /**
+   * Draws a single line of text with its baseline at [baselineY], in a logical sans-serif font of
+   * [textSizePx], so it scales with display density (unlike [drawText]'s fixed 12px font).
+   */
+  fun drawString(text: String, x: Int, baselineY: Int, textSizePx: Float, argb: Int) {
+    bufferedImage.graphics { graphics2D ->
+      graphics2D.antialiased()
+      graphics2D.color = Color(argb, true)
+      graphics2D.font = Font(Font.SANS_SERIF, Font.BOLD, 1).deriveFont(textSizePx)
+      graphics2D.drawString(text, x, baselineY)
+    }
+  }
+
   private fun consumeEmptyPoints(r: Rect) {
     emptyPoints -= ((r.left - r.left % 50)..r.right step 50).flatMap { x ->
       ((r.top - r.top % 50)..r.bottom step 50).map { y -> x to y }
@@ -309,4 +354,9 @@ private fun <T> BufferedImage.graphics(block: (Graphics2D) -> T): T {
   val result = block(graphics)
   graphics.dispose()
   return result
+}
+
+private fun Graphics2D.antialiased() {
+  setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+  setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
 }
