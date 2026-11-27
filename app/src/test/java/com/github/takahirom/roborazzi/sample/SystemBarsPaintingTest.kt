@@ -46,6 +46,28 @@ class SystemBarsPaintingTest {
     canvas.save(File("build/outputs/roborazzi/system_bars_three_button.png"), 1.0)
   }
 
+  @Test
+  fun gesturalSideNavigationStaysInsideTheBar() {
+    val navBarWidth = 63 // 24dp on the right
+    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    Canvas(bitmap).drawColor(Color.rgb(0xE8, 0xDE, 0xF8))
+    val canvas = RoboCanvas(width, height, true).apply {
+      drawImage(Rect(0, 0, width, height), bitmap)
+    }
+    val content = canvas.getPixel(width / 2, height / 2)
+    canvas.drawSystemBars(
+      SystemBarGeometry(
+        density = density,
+        statusBar = null,
+        navigationBar = Rect(width - navBarWidth, 0, width, height),
+        navigationBarSide = SystemBarGeometry.Side.Right,
+      ),
+      SystemBarsOptions(),
+    )
+    // Just left of the bar, level with the handle's centre: untouched content.
+    assertEquals(content, canvas.getPixel(width - navBarWidth - 2, height / 2))
+  }
+
   private fun paint(navBarHeight: Int): RoboCanvas {
     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
     Canvas(bitmap).drawColor(Color.rgb(0xE8, 0xDE, 0xF8))

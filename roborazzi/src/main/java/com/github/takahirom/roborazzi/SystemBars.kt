@@ -142,14 +142,18 @@ fun RoboCanvas.drawSystemBars(geometry: SystemBarGeometry, options: SystemBarsOp
     }
     when (style) {
       SystemBarsOptions.NavigationStyle.Gestural -> {
-        val handleWidth = dp(108f)
-        val handleHeight = dp(4f)
+        val length = dp(108f)
+        val thick = dp(4f)
+        // Along the bar: horizontal at the bottom, vertical on a side bar.
+        val (handleWidth, handleHeight) =
+          if (geometry.navigationBarSide == SystemBarGeometry.Side.Bottom) length to thick
+          else thick to length
         fillRoundRect(
           Rect(
             bar.centerX() - handleWidth / 2, bar.centerY() - handleHeight / 2,
             bar.centerX() + handleWidth / 2, bar.centerY() + handleHeight / 2
           ),
-          handleHeight / 2, fg
+          thick / 2, fg
         )
       }
 
